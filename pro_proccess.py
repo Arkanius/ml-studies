@@ -2,11 +2,13 @@ import pandas as pd
 data = pd.read_csv('credit-data.csv')
 data.describe()
 
-data.loc[data['age'] < 0]
+data.loc[data['age'] < 0] #busca no array todos os valores da colune age que sejam menores do que 0
 
 data.drop(data[data.age < 0].index, inplace=True)
 
+
 data['age'][data.age > 0].mean()
+
 data.loc[data['age'] < 0]
 
 pd.isnull(data['age'])
