@@ -9,7 +9,7 @@ data.drop(data[data.age < 0].index, inplace=True)
 
 data['age'][data.age > 0].mean()
 
-data.loc[data['age'] < 0]
+print(data.loc[data['age'] < 0])
 
 pd.isnull(data['age'])
 
