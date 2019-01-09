@@ -1,0 +1,325 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         id diagnosis  radius_mean  texture_mean  perimeter_mean  area_mean  \\\n",
+      "0  87139402         B        12.32         12.39           78.85      464.1   \n",
+      "1   8910251         B        10.60         18.95           69.28      346.4   \n",
+      "2    905520         B        11.04         16.83           70.92      373.2   \n",
+      "3    868871         B        11.28         13.39           73.00      384.8   \n",
+      "4   9012568         B        15.19         13.21           97.65      711.8   \n",
+      "\n",
+      "   smoothness_mean  compactness_mean  concavity_mean  points_mean  \\\n",
+      "0          0.10280           0.06981         0.03987      0.03700   \n",
+      "1          0.09688           0.11470         0.06387      0.02642   \n",
+      "2          0.10770           0.07804         0.03046      0.02480   \n",
+      "3          0.11640           0.11360         0.04635      0.04796   \n",
+      "4          0.07963           0.06934         0.03393      0.02657   \n",
+      "\n",
+      "        ...         radius_worst  texture_worst  perimeter_worst  area_worst  \\\n",
+      "0       ...                13.50          15.64            86.97       549.1   \n",
+      "1       ...                11.88          22.94            78.28       424.8   \n",
+      "2       ...                12.41          26.44            79.93       471.4   \n",
+      "3       ...                11.92          15.77            76.53       434.0   \n",
+      "4       ...                16.20          15.73           104.50       819.1   \n",
+      "\n",
+      "   smoothness_worst  compactness_worst  concavity_worst  points_worst  \\\n",
+      "0            0.1385             0.1266          0.12420       0.09391   \n",
+      "1            0.1213             0.2515          0.19160       0.07926   \n",
+      "2            0.1369             0.1482          0.10670       0.07431   \n",
+      "3            0.1367             0.1822          0.08669       0.08611   \n",
+      "4            0.1126             0.1737          0.13620       0.08178   \n",
+      "\n",
+      "   symmetry_worst  dimension_worst  \n",
+      "0          0.2827          0.06771  \n",
+      "1          0.2940          0.07587  \n",
+      "2          0.2998          0.07881  \n",
+      "3          0.2102          0.06784  \n",
+      "4          0.2487          0.06766  \n",
+      "\n",
+      "[5 rows x 32 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "from pandas import read_csv\n",
+    "from sklearn.neighbors import NearestNeighbors\n",
+    "import numpy as np\n",
+    "from sklearn.preprocessing import MinMaxScaler\n",
+    "\n",
+    "data = read_csv(\"http://datascienceacademy.com.br/blog/aluno/RFundamentos/Datasets/ML/bc_data.csv\")\n",
+    "# print(data.describe())\n",
+    "\n",
+    "print(data.head())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(type(data))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "id                     int64\n",
+      "diagnosis             object\n",
+      "radius_mean          float64\n",
+      "texture_mean         float64\n",
+      "perimeter_mean       float64\n",
+      "area_mean            float64\n",
+      "smoothness_mean      float64\n",
+      "compactness_mean     float64\n",
+      "concavity_mean       float64\n",
+      "points_mean          float64\n",
+      "symmetry_mean        float64\n",
+      "dimension_mean       float64\n",
+      "radius_se            float64\n",
+      "texture_se           float64\n",
+      "perimeter_se         float64\n",
+      "area_se              float64\n",
+      "smoothness_se        float64\n",
+      "compactness_se       float64\n",
+      "concavity_se         float64\n",
+      "points_se            float64\n",
+      "symmetry_se          float64\n",
+      "dimension_se         float64\n",
+      "radius_worst         float64\n",
+      "texture_worst        float64\n",
+      "perimeter_worst      float64\n",
+      "area_worst           float64\n",
+      "smoothness_worst     float64\n",
+      "compactness_worst    float64\n",
+      "concavity_worst      float64\n",
+      "points_worst         float64\n",
+      "symmetry_worst       float64\n",
+      "dimension_worst      float64\n",
+      "dtype: object\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(data.dtypes)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(569, 32)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(data.shape)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "False\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(data.isnull().values.any())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(data.ndim)\n",
+    "\n",
+    "data = data.drop(columns='id')\n",
+    "values = data.values\n",
+    "diag = values[:, 0]\n",
+    "normalizedValues = values[:, 1:30]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[-0.51329651 -1.60559452 -0.54037561 ... -0.70997823 -0.31513306\n",
+      "  -0.11932056]\n",
+      " [-1.00180093 -0.07903849 -0.93456583 ... -0.38662514 -0.53820271\n",
+      "   0.06348865]\n",
+      " [-0.87683468 -0.57237672 -0.8670139  ... -0.79393489 -0.61357437\n",
+      "   0.15731992]\n",
+      " ...\n",
+      " [ 0.32738551  0.72612674  0.28631171 ...  0.43567039  0.12171802\n",
+      "   0.44366709]\n",
+      " [ 0.11437486 -1.23559085  0.07788929 ... -0.64713067 -0.11733956\n",
+      "  -0.47685008]\n",
+      " [ 2.05703196 -0.97495933  2.03195239 ...  0.62469281  1.24848623\n",
+      "  -0.27624528]]\n",
+      "(569, 29)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(normalizedValues)\n",
+    "print(np.shape(normalizedValues))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[-0.51329651 -1.60559452 -0.54037561 ... -0.70997823 -0.31513306\n",
+      "  -0.11932056]\n",
+      " [-1.00180093 -0.07903849 -0.93456583 ... -0.38662514 -0.53820271\n",
+      "   0.06348865]\n",
+      " [-0.87683468 -0.57237672 -0.8670139  ... -0.79393489 -0.61357437\n",
+      "   0.15731992]\n",
+      " ...\n",
+      " [ 0.32738551  0.72612674  0.28631171 ...  0.43567039  0.12171802\n",
+      "   0.44366709]\n",
+      " [ 0.11437486 -1.23559085  0.07788929 ... -0.64713067 -0.11733956\n",
+      "  -0.47685008]\n",
+      " [ 2.05703196 -0.97495933  2.03195239 ...  0.62469281  1.24848623\n",
+      "  -0.27624528]]\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/victor/anaconda3/lib/python3.6/site-packages/sklearn/utils/validation.py:475: DataConversionWarning: Data with input dtype object was converted to float64 by StandardScaler.\n",
+      "  warnings.warn(msg, DataConversionWarning)\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "\n",
+    "scaler = StandardScaler().fit(normalizedValues)\n",
+    "normalizedValues = scaler.transform(normalizedValues)\n",
+    "print(normalizedValues)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'numpy.ndarray'>\n",
+      "Acurácia: 98.242% (1.569%)\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Separando em treino e teste\n",
+    "from sklearn import model_selection\n",
+    "from sklearn.linear_model import LogisticRegression\n",
+    "from sklearn.metrics import confusion_matrix\n",
+    "\n",
+    "num_folds = 10\n",
+    "num_instances = len(normalizedValues)\n",
+    "seed = 7\n",
+    "\n",
+    "# Separando os dados em folds\n",
+    "kfold = model_selection.KFold(num_folds, True, random_state = seed)\n",
+    "\n",
+    "# Criando o modelo\n",
+    "model = LogisticRegression()\n",
+    "\n",
+    "accuracy = model_selection.cross_val_score(model, normalizedValues, diag, cv = kfold, scoring = 'accuracy')\n",
+    "print(type(accuracy))\n",
+    "\n",
+    "# Usamos a média e o desvio padrão\n",
+    "print(\"Acurácia: %.3f%% (%.3f%%)\" % (accuracy.mean()*100.0, accuracy.std() * 100.0))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
